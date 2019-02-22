@@ -24,7 +24,8 @@ module.exports = {
           'vue-style-loader',
           'css-loader'
         ],
-      }, {
+      },
+      {
         test: /\.vue$/,
         loader: 'vue-loader',
         options: {
@@ -50,7 +51,7 @@ module.exports = {
 
         loader: "style-loader!css-loader!less-loader",
 
-      }
+      },
     ]
   },
   resolve: {
