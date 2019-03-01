@@ -1,7 +1,7 @@
 <template>
   <div class="lists">
     <ul>
-      <li v-for="(item,index) in list_" :class ="{'active':index==0}"  :userid = item.userId @click="active($event.currentTarget)">
+      <li v-for="item in list_"  v-show="item.online" :userid = item.userId @click="active($event.currentTarget)">
         <span>
           <i v-show="item.msgLength>0" v-if="item.msgLength>99">99+</i>
           <i v-show="item.msgLength>0" v-else>{{item.msgLength}}</i>
@@ -12,7 +12,22 @@
             <span class="name">{{item.name}}</span>
             <span>{{item.time}}</span>
           </div>
-          <p class="message">{{item.message}}</p>
+          <p class="message">{{item.last_message}}</p>
+        </div>
+      </li>
+      <li v-for="item in list_"  v-show="!item.online" :userid = item.userId @click="active($event.currentTarget)">
+        <span>
+          <i v-show="item.msgLength>0" v-if="item.msgLength>99">99+</i>
+          <i v-show="item.msgLength>0" v-else>{{item.msgLength}}</i>
+          <img :src="item.head_img">
+          <span></span>
+        </span>
+        <div>
+          <div>
+            <span class="name">{{item.name}}</span>
+            <span>{{item.time}}</span>
+          </div>
+          <p class="message">{{item.last_message}}</p>
         </div>
       </li>
     </ul>
@@ -24,36 +39,57 @@
     name: "list",
     data() {
       return {
-        active_list:'',
-        new_list :""
+        //好友列表
+        userList:{},
+        // 当前好友
+        activeUser:""
       }
     },
+    //接收来自chat的好友信息
     props:['list_'],
-    updated(){
-      this.new_list = this.list_;
-      this.active_list = this.new_list[0];
-    },
+    // updated(){
+    //
+    //   if(this.userList == ""){
+    //     // 接收好友列表复制以用于操作
+    //     this.userList = this.list_
+    //     //设置默认聊天好友为列表第一个用户
+    //     // this.activeUser = this.userList[0];
+    //   }
+    // },
     methods:{
+      //设置当前选中好友并更新聊天记录为当前好友
       active(node){
         if(!$(node).hasClass("active")){
           $(node).siblings().removeClass("active")
           $(node).addClass("active")
-          for (var i = 0; i <this.new_list.length ; i++) {
-            if($(node).attr("userid") == this.new_list[i].userId){
-              this.active_list = this.new_list[i]
+          //根据id查找到选中好友信息
+          for (var i = 0; i <this.userList.length ; i++) {
+            if($(node).attr("userid") == this.userList[i].userId){
+              //设置当前选中好友
+              this.activeUser = this.userList[i]
             }
           }
         }
       }
     },
     watch:{
-      active_list:{
+      list_:function(val){
+          // 接收好友列表复制以用于操作
+          this.userList = val
+      },
+      // 检测当前好友信息变化
+      activeUser:{
         handler(){
-          this.active_list.msgLength = 0;
-          this.$emit("active_lists",this.active_list)
+          //设置消息未读为0
+          this.activeUser.msgLength = 0;
+          // 传值给chat
+          this.$emit("getActiveUser",this.activeUser)
         },
         deep:true
       }
+    },
+    mounted(){
+      // $(".lists>ul>li").eq(0).addClass("active")
     }
 
   }
@@ -78,7 +114,10 @@
       cursor: pointer;
       &>span{
         position: relative;
+        width: 43px;
+        height: 43px;
         display: inline-block;
+        font-size: 0;
         &>i{
           max-width: 40px;
           padding: 0 8px;
@@ -93,11 +132,22 @@
           font-style: normal;
           top: -10px;
           left: 50%;
+          z-index: 99;
         }
         & > img {
           width: 43px;
           height: 43px;
           border-radius: 3px;
+        }
+        &>span{
+          position: absolute;
+          top: 0;
+          left: 0;
+          display: inline-block;
+          width: 100%;
+          height: 100%;
+          background: rgba(255,255,255,0.8);
+          z-index: 9;
         }
       }
       & > div {

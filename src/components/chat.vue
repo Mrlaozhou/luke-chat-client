@@ -2,24 +2,31 @@
   <div>
     <div class="content">
       <div class="list">
-        <screen @getMessage="getVal" :gr = gr></screen>
-        <list :list_ = list_ @active_lists="getActiveList" ></list>
+        <screen @getUser="getUserVal" :gr = gr></screen>
+        <list :list_ = list_  @getActiveUser="ActiveUser" ></list>
       </div>
       <div class="main">
-        <message :active_list = active_list :gr = gr></message>
+        <message @sendMsg = 'sendMsg' @success  = 'UploadSuccess' :activeUser = activeUser :gr = gr ref = 'vueMessage'></message>
       </div>
     </div>
-    <div class="chat_icon" @click="open_chat()">
+    <div class="chat_icon">
       <i v-if="gr.msgLh>99">99+</i>
       <i v-else>{{gr.msgLh}}</i>
-      <img src="../../static/imgs/chat.png" alt="">
+      <span v-if="gr" class="iconfont online" @mouseenter="hover_()" @click="open_chat($event.currentTarget)">&#xec7b;</span>
+      <span v-else class="iconfont offline" @mouseenter="hover_()" @click="open_chat($event.currentTarget)">&#xec7d;</span>
+        <div>
+          <div class="OnlineState">
+            <span @click="Online()">上线</span>
+            <span @click="Offline()">下线</span>
+          </div>
+        </div>
     </div>
   </div>
 
 </template>
 
 <script>
-  // import sid from "../components/sidebar"
+  import 'jquery'
   import list from "../components/list"
   import screen from "../components/screen"
   import message from "../components/message"
@@ -29,32 +36,95 @@
     name: "chat",
     data() {
       return {
-        Message:"",
-        active_list:"",
+        // 搜索值
+        searchUser:"",
+        //当前好友
+        activeUser:"",
       }
     },
     methods:{
-      getVal(msg){
-        this.Message=msg;
+      //设置在线
+      Online(){
+        $(".OnlineState").addClass("On_line")
+        this.$emit('Online')
       },
-      getActiveList(msg){
-        this.active_list=msg;
+      //下线
+      Offline(){
+        $(".OnlineState").removeClass("On_line")
+        this.$emit('Offline')
+        var gr = {}
+        this.$emit('OnConnetionSuccess',gr)
       },
-      open_chat(){
-        $(".chat_icon").fadeOut("fast")
-        $(".content").fadeIn("fast")
+      //调用message中的设置上传路径方法
+      vueMessage(url){
+        this.$refs.vueMessage.setUploadUrl(url)
+      },
+      //调用message中的接收消息方法
+      receivdMsg(msg){
+        this.$refs.vueMessage.receivdMsg(msg)
+      },
+      //消息发送
+      sendMsg(){
+        this.$emit('message_sendMsg')
+      },
+      //消息滚动
+      scroll_bottom() {
+       this.$refs.vueMessage.scroll_bottom()
+      },
+      //上传成功回调
+      UploadSuccess(){
+        this.$emit('message_UploadSuccess')
+      },
+      //接收screen的搜索值
+      getUserVal(msg){
+        this.searchUser=msg;
+      },
+      // 接收list的当前好友信息
+      ActiveUser(msg){
+        this.activeUser=msg;
+      },
+      open_chat(node){
+        if($(node).hasClass("online")){
+          $(".chat_icon").fadeOut("fast")
+          $(".content").fadeIn("fast")
+        }
+
+      },
+      hover_(){
+        $(".chat_icon>div").fadeIn("fast")
+        setTimeout(function(){
+          $(".chat_icon>div").fadeOut("fast")
+        },2000)
       }
     },
     watch:{
-      Message:function(){
-        this.$emit("getMessage",this.Message)
+      //检测搜索值变化时传值给父组件
+      searchUser:function(){
+        this.$emit("getUserVal",this.searchUser)
       }
     },
     props:['list_','gr']
   }
 </script>
 
-<style scoped lang="less">
+<style  lang="less">
+  @font-face {
+    font-family: 'iconfont';  /* project id 1063067 */
+    src: url('//at.alicdn.com/t/font_1063067_4zxrhygrvk9.eot');
+    src: url('//at.alicdn.com/t/font_1063067_4zxrhygrvk9.eot?#iefix') format('embedded-opentype'),
+    url('//at.alicdn.com/t/font_1063067_4zxrhygrvk9.woff2') format('woff2'),
+    url('//at.alicdn.com/t/font_1063067_4zxrhygrvk9.woff') format('woff'),
+    url('//at.alicdn.com/t/font_1063067_4zxrhygrvk9.ttf') format('truetype'),
+    url('//at.alicdn.com/t/font_1063067_4zxrhygrvk9.svg#iconfont') format('svg');
+  }
+  .iconfont {
+    font-family: "iconfont" !important;
+    font-size: 20px;
+    font-style: normal;
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-stroke-width: 0.2px;
+    -moz-osx-font-smoothing: grayscale;
+  }
   .content {
     position: fixed;
     left: 50%;
@@ -115,7 +185,7 @@
   .chat_icon{
     cursor: pointer;
     position: fixed;
-    bottom: 50px;
+    bottom: 100px;
     right: 50px;
     width: 50px;
     height: 50px;
@@ -133,11 +203,59 @@
       font-size: 12px;
       font-style: normal;
     }
-    &>img{
+    &>span{
+      display: inline-block;
       width: 100%;
       height: 100%;
       border-radius: 5px;
       box-shadow: 2px 5px 33px 0px grey;
+      font-size: 48px;
+    }
+    .online{
+      color: #0096e1;
+    }
+    .offline{
+      color:#dbdbdb;
+    }
+    &>div{
+      width: 100%;
+      height: 20px;
+      overflow: hidden;
+      position: relative;
+      bottom: -10px;
+      border-radius: 8px;
+      display: none;
+      &>div{
+        width: 100%;
+        &>span:nth-of-type(1){
+          text-align: center;
+          display: block;
+          font-size: 12px;
+          height: 20px;
+          line-height: 20px;
+          overflow: hidden;
+          position: relative;
+          background: #2CC169;
+          color: white;
+        }
+        &>span:nth-of-type(2){
+          text-align: center;
+          display: block;
+          font-size: 12px;
+          height: 20px;
+          line-height: 20px;
+          overflow: hidden;
+          position: relative;
+          background: #DA2F2C;
+          color: white;
+        }
+      }
+      .OnlineState{
+        position: relative;
+      }
+      .On_line{
+        top:-20px
+      }
     }
   }
 </style>

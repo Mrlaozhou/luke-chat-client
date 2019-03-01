@@ -1,7 +1,7 @@
 <template>
   <div class="screen">
     <img :src="gr.head_img" alt="">
-    <input type="text" placeholder="搜索" v-model="message"  class="search">
+    <input type="text" placeholder="搜索" v-model="searchUser"  class="search">
 
   </div>
 </template>
@@ -11,22 +11,24 @@
     name: "screen",
     data(){
       return{
-        message:"",
+        //搜索值
+        searchUser:"",
+        // 个人信息
         gr_:""
       }
     },
+    //接收个人信息
     props:['gr'],
     updated(){
+      //赋值个人信息
       this.gr_ = this.gr
     },
     methods:{
-      // setUser(){
-      //   this.$emit("transferUser",this.message)
-      // }
     },
     watch:{
-      message:function(){
-        this.$emit("getMessage",this.message)
+      //检测搜索值变化时传值到父组件
+      searchUser:function(){
+        this.$emit("getUser",this.searchUser)
       }
     }
   }

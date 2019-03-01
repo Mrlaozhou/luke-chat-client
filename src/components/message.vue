@@ -1,57 +1,51 @@
 <template>
   <div class="message">
     <div class="title">
-      <span>{{active_list.name}}</span>
+      <span>{{activeUser.name}}</span>
       <span @click="close_()">
-          <img src="/src/assets/x.png" alt="">
+          <i class="iconfont">&#xe619;</i>
       </span>
     </div>
     <div class="msgbox">
       <ul>
-        <li  v-for="item in message"  :class="item.class">
-          <span v-if="item.class=='tips'">{{item.text}}</span>
-          <div v-else-if="item.class=='receive'">
-            <img :src="item.head_img" alt="">
+        <li  v-for="item in activeUser.Message_record"  :class="item.type">
+          <span v-if="item.type=='tips'">{{item.text}}</span>
+          <div v-else-if="item.type=='receive'">
+            <img :src="activeUser.head_img" alt="">
             <p><i></i><span>{{item.text}}</span></p>
           </div>
-          <div v-else-if="item.class=='receive_'">
+          <div v-else-if="item.type=='receive_'">
             <p>
               <i></i>
               <span >
                 <img v-if="item.img_file" :src="item.text" alt="">
                   <div v-else>
-                     <img :src="item.text" alt="">
+                     <!--<img :src="item.text" alt="">-->
+                    <span class="iconfont">&#xec7c;</span>
                     <div>
                       <span>{{item.name}}</span>
                       <span>{{item.size}}MB</span>
                     </div>
                   </div>
-
-                <!--<span :class="'mk'+item.percent">-->
-                  <!--<span >-->
-                    <!--<img src="../../static/imgs/loading.gif" alt="">-->
-                    <!--<br><span :class="'t'+item.percent"></span>-->
-                  <!--</span>-->
-                <!--</span>-->
               </span>
             </p>
-            <img :src="item.head_img" alt="">
+            <img :src="activeUser.head_img" alt="">
           </div>
-          <div v-else-if="item.class=='send'">
+          <div v-else-if="item.type=='send'">
             <p>
               <i></i>
               <span v-html="item.text"></span>
               <img  :class="'shibai m'+item.percent" src="../../static/imgs/sb.png" alt="">
             </p>
-            <img :src="item.head_img" alt="">
+            <img :src="gr.head_img" alt="">
           </div>
-          <div v-else-if="item.class=='send_'">
+          <div v-else-if="item.type=='send_'">
               <p>
                 <i></i>
                 <span >
                 <img v-if="item.img_file" :src="item.text" alt="">
                   <div v-else>
-                     <img :src="item.text" alt="">
+                     <span class="iconfont">&#xec7c;</span>
                     <div>
                       <span>{{item.name}}</span>
                       <span>{{item.size}}MB</span>
@@ -67,20 +61,24 @@
               </span>
                 <img  :class="'shibai m'+item.percent" src="../../static/imgs/sb.png" alt="">
             </p>
-              <img :src="item.head_img" alt="">
+              <img :src="gr.head_img" alt="">
           </div>
         </li>
       </ul>
     </div>
     <div class="ed">
       <div>
-        <img src="../assets/biaoq.png" @click.stop="open_face()" alt="">
-        <img src="../assets/wjian.png" alt="">
+        <span class="iconfont" @click.stop="open_face()">&#xe691;</span>
+        <span class="iconfont">&#xe65f;</span>
+        <!--<img src="/static/imgs/biaoq.png"  alt="">-->
+        <!--<img src="/static/imgs/wjian.png" alt="">-->
         <form class="upload" enctype='multipart/form-data'>
           <input type="file" id="userfile" @change="upload($event.currentTarget)" name="file">
         </form>
       </div>
-      <div contenteditable="true" id="msg" ref="textarea" @keyup.enter="send()"></div>
+      <div v-if="activeUser.online" contenteditable="true" id="msg" ref="textarea" @keyup.enter="send()"></div>
+      <div v-else contenteditable="false" id="msg" ref="textarea" @keyup.enter="send()"></div>
+
     </div>
     <face @choose_face="get_faceVal" :open_faceList=open_faceList></face>
   </div>
@@ -91,65 +89,36 @@
   export default {
     components: {face},
     name: "message",
-    props: ["active_list", 'gr'],
+    //接收个人信息，与当前好友聊天信息
+    props: ['gr',"activeUser" ],
     data() {
       return {
         gr_: "",
+        //当前选择表情
         active_face: "",
+        // 表情列表是否打开
         open_faceList: "",
-        message: [
-          {
-            class: "tips",
-            text: "下午4:33",
-            head_img: "",
-          },
-          {
-            class: "receive",
-            text: "你好",
-            head_img: "../../static/imgs/dog.png",
-          },
-          {
-            class: "tips",
-            text: "啦啦啦啦啦，啦啦啦，啦啦啦啦啦，没写,加入了群聊",
-            head_img: "",
-          },
-          {
-            class: "receive_",
-            head_img: "../../static/imgs/dog.png",
-            text:"../../static/imgs/wj.png",
-            percent:"",
-            img_file:false,
-            name:"文件.zip",
-            size:20
-          },
-          {
-            class: "receive_",
-            text: "../../static/imgs/thomas.jpg",
-            head_img: "../../static/imgs/dog.png",
-            img_file:true,
-          },
-          {
-            class: "receive",
-            text: "你好face[kun]face[kun]哈哈哈face[huaixiao]",
-            head_img: "../../static/imgs/dog.png",
-          },
-          {
-            class: "send",
-            text: "实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一实施以来的一",
-            head_img: "../../static/imgs/thomas.jpg",
-          }
-        ]
+        uploadUrl:""
       }
     },
     watch: {
       active_face: function (val) {
         this.open_faceList = false
+      },
+      activeUser:{
+        handler(){
+          //设置消息未读为0
+          this.activeUser.Message_record.msgLength = 0 ;
+          // 传值给chat
+          this.$emit("getActiveUser",this.activeUser)
+        },
+        deep:true
       }
     },
     updated() {
       var self = this;
       self.gr_ = self.gr;
-      for (var i = 0; i <self.message.length ; i++) {
+      // for (var i = 0; i <self.active_message.length ; i++) {
 
         // var str1 = self.message[i].text.replace("face[", "<img src='../../static/imgs/qqface/")
 
@@ -167,10 +136,30 @@
 
 
 
-      }
+      // }
 
     },
     methods: {
+      //设置上传地址
+      setUploadUrl(url){
+          this.uploadUrl = url
+      },
+      // 接收消息回调
+      receivdMsg(msg){
+        if(this.activeUser){
+          this.activeUser.Message_record.push(msg)
+        }
+
+      },
+      //消息发送
+      sendMsg(){
+        this.$emit("sendMsg")
+      },
+      // 上传成功回调
+      UploadSuccess(){
+        this.$emit("success")
+      },
+      //在光标前插入表情
       placeCaret(el, atStart) {
         el.focus();
         if (typeof window.getSelection != 'undefined' && typeof document.createRange != 'undefined') {
@@ -187,29 +176,38 @@
           textRange.select();
         }
       },
+      // 发送消息
       send() {
         var self = this;
-        var text = $("#msg").html().replace('<div><br></div>','');
+        //清除因回车发送造成的换行
+        $("#msg>div").remove()
+        var text = $("#msg").html();
         if (text != "") {
-          this.message.push({
-            class:"send",
+          this.activeUser.Message_record.push({
+            type:"send",
             text:text,
-            head_img:self.gr_.head_img
           })
+          //发送
+          self.sendMsg()
+          //消息滚动
+          this.scroll_bottom()
+          //清空输入
+          $("#msg").html("")
         }
-        this.scroll_bottom()
-        $("#msg").html("")
       },
+      //消息滚动
       scroll_bottom() {
         var content_height = $(".msgbox>ul").height()
         $(".msgbox").animate({
           scrollTop: $(".msgbox>ul").height()
         })
       },
+      //关闭
       close_() {
         $(".content").fadeOut("fast")
         $(".chat_icon").fadeIn("fast")
       },
+      //表情写入
       get_faceVal(msg) {
         this.active_face = msg
         $("#msg").append(
@@ -217,9 +215,11 @@
         );
         this.placeCaret(document.querySelector('#msg'), false)
       },
+      // 打开表情列表
       open_face() {
         this.open_faceList = true
       },
+      // 上传文件
       upload(node) {
         var self = this;
         var file = document.querySelector('input[type=file]').files[0];
@@ -232,8 +232,8 @@
         var extStart = path.lastIndexOf('.'),
           ext = path.substring(extStart, path.length).toUpperCase();
         if (ext !== '.PNG' && ext !== '.JPG' && ext !== '.JPEG' && ext !== '.GIF'&& ext !== '.webp' && ext !== '.bmp' && ext !== '.tif') {
-          self.message.push({
-            class:"send_",
+          self.activeUser.Message_record.push({
+            type:"send_",
             text:"../../static/imgs/wj.png",
             head_img:self.gr_.head_img,
             percent:timestamp,
@@ -242,8 +242,8 @@
             size:(file.size/1024/1024).toFixed(2)
           })
         }else{
-          self.message.push({
-            class:"send_",
+          self.activeUser.Message_record.push({
+            type:"send_",
             text:window.URL.createObjectURL(file),
             head_img:self.gr_.head_img,
             percent:timestamp,
@@ -251,45 +251,48 @@
           })
         }
         $.ajax({
-          url: ".....",
+          url: self.uploadUrl,
           type: 'POST',
           cache: false,
           data: formData,
           processData: false,
           contentType: false,
           dataType: "json",
+          // 上传进度监测
           xhr: xhrOnProgress(function (e) {
             var percent = e.loaded / e.total;
             var per= 't'+timestamp;
             $("."+per).text(percent+'%')
           }),
           success: function (data) {
-            if (data.code == 1) {
               var per= 'mk'+timestamp;
               $("."+per).fadeOut("fast")
-            } else {
-              var per= 'm'+timestamp;
-              $("."+per).fadeIn("fast")
-            }
+              this.UploadSuccess()
           },
           error:function(){
             var per= 'm'+timestamp;
             $("."+per).fadeIn("fast")
           }
         });
-      }
+      },
     },
     mounted() {
       var self = this;
+      // 消息默认在最底部
       self.scroll_bottom()
+      //输入框聚焦
       $("#msg").focus()
+      //点击空白关闭表情列表
       $("body,html").click(function () {
         if (self.open_faceList) {
           self.open_faceList = false
         }
       })
+      this.setUploadUrl()
     }
   }
+
+  //检测上传文件
   var xhrOnProgress = function (fun) {
     xhrOnProgress.onprogress = fun; //绑定监听
     //使用闭包实现监听绑
@@ -308,7 +311,7 @@
   }
 </script>
 
-<style lang="less">
+<style lang="less" scoped>
   * {
     margin: 0;
     padding: 0;
@@ -353,16 +356,13 @@
         display: inline-block;
         position: relative;
         cursor: pointer;
-        &:hover > img {
-          opacity: 1;
-        }
-        & > img {
+        & > i {
           position: absolute;
           top: 55%;
-          left: 50%;
+          left: 57%;
           transform: translate(-50%, -50%);
-          width: 8px;
-          opacity: 1;
+          width: 13px;
+          font-size: 12px;
           /*transition: ease-in-out opacity 0.2s;*/
         }
       }
@@ -478,8 +478,9 @@
             &>div{
               width: 250px;
               background: white;
-              &>img{
-                width: 80px;
+              &>span{
+                font-size: 80px;
+                color: #0096e1;
               }
               &>div{
                 width: 160px;
@@ -605,8 +606,9 @@
             &>div{
               width: 250px;
               background: white;
-              &>img{
-                width: 80px;
+              &>span{
+                font-size: 80px;
+                color: #0096e1;
               }
               &>div{
                 width: 160px;
@@ -676,16 +678,18 @@
       }
     }
   }
-
   .ed {
     height: 150px;
     padding: 20px;
     & > div:nth-of-type(1) {
       position: relative;
-      & > img {
+      & > span {
+        display: inline-block;
         width: 25px;
         margin-right: 8px;
         cursor: pointer;
+        color: #8a8a8a;
+        font-size: 25px;
       }
       .upload {
         width: 25px;
