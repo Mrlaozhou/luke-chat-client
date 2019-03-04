@@ -1,24 +1,57 @@
 <template>
     <div class="ed">
         <div>
-            <span class="iconfont" @click.stop="open_face()">&#xe691;</span>
+            <span class="iconfont" @click.stop="__showEmoji()">&#xe691;</span>
             <span class="iconfont">&#xe65f;</span>
             <form class="upload" enctype='multipart/form-data'>
-                <input type="file" id="userfile" @change="upload($event.currentTarget)" name="file">
+                <input type="file" id="userfile" @change="__fileUpload($event.currentTarget)" name="file">
             </form>
         </div>
-        <div contenteditable="true" id="msg" ref="textarea" @keyup.enter="send()"></div>
+        <div contenteditable="true" id="msg" ref="textarea" @keyup.enter="sendMessageToTarget()"></div>
+        <Emoji
+                :show="showEmoji"
+                @chooseEmoji="chooseEmoji"
+        ></Emoji>
     </div>
 </template>
 
 <script>
+    import Emoji from '../Emoji';
     export default {
         name: "Box",
+        components: { Emoji },
+        data() {
+            return {
+                showEmoji: false,
+            };
+        },
         props: {
             target: Object,
+            fileUploadUrl: String,
         },
         methods: {
+            //
+            sendMessageToTarget() {
+                var self = this;
+                //清除因回车发送造成的换行
+                $("#msg>div").remove()
+                var text = $("#msg").html();
+                if (text) {
+                    this.$emit('dialogSendMessage',text );
+                }
+            },
+            //  选择表情
+            chooseEmoji(name) {
 
+            },
+            //  文件上传
+            __fileUpload() {
+
+            },
+            __showEmoji() {
+                this.showEmoji  =   true;
+                this.$console('显示Emoji', this.showEmoji);
+            },
         },
         created(){
 

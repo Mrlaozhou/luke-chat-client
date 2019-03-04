@@ -29,7 +29,6 @@
         name: "Narrow",
         data(){
             return {
-                unread: 4,
                 showOperate: false
             };
         },
@@ -37,7 +36,8 @@
             status: {
                 type: Boolean,
                 default: false
-            }
+            },
+            unread: Number,
         },
         methods: {
             //  切换到normal显示

@@ -12,8 +12,10 @@
         <!-- 左侧对话 -->
         <Dialog
                 :target="target"
+                :fileUploadUrl="fileUploadUrl"
                 @getCurrentTarget="getCurrentTarget"
                 @switchDisplayType="switchDisplayType"
+                @SendMessage="SendMessage"
         ></Dialog>
     </div>
 </template>
@@ -31,8 +33,32 @@
         },
         props: {
             profile: Object,
+            fileUploadUrl: String,
         },
         methods: {
+            //
+            SendMessage(content, file=false) {
+                if( !this.target || (this.target.status === 'outline') || !content ) {
+                    return false;
+                }
+                //  信息包
+                let messagePackage   =     {
+                    type: 'send',
+                    to: this.target.fd,
+                    content: content,
+                    file: file ? file : '',
+                    payload: [],
+                };
+                //  发送至服务端
+                this.$emit('webSocketSend', JSON.stringify( messagePackage ));
+                //  更新本地数据
+                this.target.sessions.push( messagePackage );
+                this.$console( '发送数据', content, this.target );
+            },
+            //  接收到联系人消息
+            receivedContactMessage(message) {
+                return this.__contactsComponent().normalReceivedContactMessage( message );
+            },
             //  获取选中用户
             getCurrentTarget() {
                 return this.target;

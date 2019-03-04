@@ -1,7 +1,11 @@
 <template>
     <div class="dialog">
         <DialogSessions :target="target"></DialogSessions>
-        <DialogBox :target="target"></DialogBox>
+        <DialogBox
+                :target="target"
+                :fileUploadUrl="fileUploadUrl"
+                @dialogSendMessage="dialogSendMessage"
+        ></DialogBox>
     </div>
 </template>
 
@@ -16,6 +20,13 @@
         },
         props: {
             target: Object,
+            fileUploadUrl: String,
+        },
+        methods: {
+            //  发送对话消息
+            dialogSendMessage(message) {
+                return this.$emit('SendMessage', message);
+            }
         }
     }
 </script>

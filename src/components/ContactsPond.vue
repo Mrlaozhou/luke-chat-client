@@ -78,9 +78,17 @@
             contactChoose(target) {
                 this.$emit('setCurrentTarget', target);
             },
+            //  normal接收到服务端消息
+            normalReceivedContactMessage(message) {
+                if( message && typeof message === 'object') {
+                    this.contacts[ message.fd ]     =   message;
+                }
+            },
             //
-            nowTarget() {
-                return this.$emit('getCurrentTarget');
+            getContactEntityByFd (fd) {
+                return this.contacts[fd]
+                    ?   this.contacts[fd]
+                    :   false;
             }
         }
     }

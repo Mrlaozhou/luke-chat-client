@@ -4,7 +4,10 @@
         <Normal
                 v-show="status && (displayType === 'normal')"
                 @switchDisplayType="switchDisplayType"
+                @webSocketSend="webSocketSend"
+                @unreadIncrement="unreadIncrement"
                 :profile="profile"
+                :fileUploadUrl="fileUploadUrl"
                 ref="normalComponent"
         ></Normal>
 
@@ -12,8 +15,10 @@
         <Narrow
                 v-show="!status || displayType === 'narrow'"
                 :status="status"
+                :unread="unread"
                 @makeUserOnline="makeUserOnline"
                 @makeUserOutline="makeUserOutline"
+                @unreadIncrement="unreadIncrement"
                 @switchDisplayType="switchDisplayType"
                 ref="narrowComponent"
         ></Narrow>
@@ -33,7 +38,9 @@
 
             serviceAddress: String,         //  服务端地址
 
-            serviceConnectHeaders: Object,  //  连接事的请求headers
+            serviceConnectHeaders: Object,  //  连接时的请求headers
+
+            serviceConnectParams: Object,   //  连接时的参数
 
             customAnalysisReceived: {
                 type: [ Function, Boolean ],
@@ -48,13 +55,21 @@
             return {
                 status: false,  //  当前用户状态
                 displayType: 'narrow', //  显示方式
-                wsConnection: {}
+                wsConnection: {},
+                unread:0,
             };
         },
         methods: {
             //  用户上线
             makeUserOnline() {
                 this.wsConnection       =   this.__establishWebSocketConnection();
+            },
+            /**
+             *  获取webSocket实例
+             * @returns {WebSocket}
+             **/
+            webSocketSend(data) {
+                return this.wsConnection.send(data);
             },
             /**
              * 建立webSocket连接
@@ -124,7 +139,10 @@
                         break;
                     case 'system':
                     default:
-
+                        //  未读消息
+                        this.unreadIncrement();
+                        //
+                        this.__normalComponent().receivedContactMessage( jsonData );
                         break;
                 }
             },
@@ -144,6 +162,10 @@
             //  状态下线
             setStatusOutline() {
                 this.status         =   false;
+            },
+            //  未读消息
+            unreadIncrement(offset=1) {
+                this.unread     =   this.unread + offset;
             },
             /**
              * @returns {Vue | Element | Vue[] | Element[]}

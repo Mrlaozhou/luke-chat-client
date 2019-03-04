@@ -6,64 +6,12 @@
             <i class="iconfont">&#xe619;</i>
             </span>
         </div>
-        <div class="msgbox">
-            <ul>
-                <li v-for="item in target.sessions" :class="item.type">
-                    <span v-if="item.type=='tips'">{{item.text}}</span>
-                    <div v-else-if="item.type=='receive'">
-                        <img :src="target.head_img" alt="">
-                        <p><i></i><span>{{item.text}}</span></p>
-                    </div>
-                    <div v-else-if="item.type=='receive_'">
-                        <p>
-                            <i></i>
-                            <span>
-                            <img v-if="item.img_file" :src="item.text" alt="">
-                                <div v-else>
-                                    <!--<img :src="item.text" alt="">-->
-                                    <span class="iconfont">&#xec7c;</span>
-                                    <div>
-                                        <span>{{item.name}}</span>
-                                        <span>{{item.size}}MB</span>
-                                    </div>
-                                </div>
-                            </span>
-                        </p>
-                        <img :src="target.head_img" alt="">
-                    </div>
-                    <div v-else-if="item.type=='send'">
-                        <p>
-                            <i></i>
-                            <span v-html="item.text"></span>
-                            <img :class="'shibai m'+item.percent" src="../../../static/imgs/sb.png" alt="">
-                        </p>
-                        <img :src="gr.head_img" alt="">
-                    </div>
-                    <div v-else-if="item.type=='send_'">
-                        <p>
-                            <i></i>
-                            <span>
-                            <img v-if="item.img_file" :src="item.text" alt="">
-                                <div v-else>
-                                    <span class="iconfont">&#xec7c;</span>
-                                    <div>
-                                        <span>{{item.name}}</span>
-                                        <span>{{item.size}}MB</span>
-                                    </div>
-                                </div>
-                            <span :class="'mk'+item.percent">
-                                <span>
-                                    <img src="../../../static/imgs/loading.gif" alt="">
-                                    <br><span :class="'t'+item.percent"></span>
-                                </span>
-                            </span>
-                            </span>
-                            <img :class="'shibai m'+item.percent" src="../../../static/imgs/sb.png" alt="">
-                        </p>
-                        <img :src="gr.head_img" alt="">
-                    </div>
-                </li>
-            </ul>
+        <div class="sessionLists">
+            <template v-for="(item, index) in target.sessions">
+                <System v-if="item.type === 'system'" :message="item"></System>
+                <Target v-else-if="item.type === 'message'" :message="item"></Target>
+                <Self v-else :message="item"></Self>
+            </template>
         </div>
     </div>
 </template>
@@ -93,7 +41,7 @@
 </script>
 
 <style scoped lang="less">
-    .msgbox {
+    .sessionLists {
         width: 100%;
         height: 360px;
         padding: 0 25px;
